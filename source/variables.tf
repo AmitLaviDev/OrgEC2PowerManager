@@ -4,9 +4,9 @@ variable "account" {
   type        = string
 }
 
-variable "region" {
-  description = "AWS region"
-  type        = string
+variable "regions" {
+  type        = list(string)
+  description = "List of AWS regions where resources should be deployed."
 }
 
 variable "accounts_arns" {

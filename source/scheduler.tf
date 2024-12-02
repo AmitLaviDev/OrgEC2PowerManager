@@ -50,11 +50,11 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
 
 # Lambda Function
 resource "aws_lambda_function" "scheduler_lambda" {
-  filename         = var.lambda_package_path
+  filename         = "lambda_deployment_package.zip"
   function_name    = "InstanceSchedulerFunction"
   role             = aws_iam_role.lambda_exec_role.arn
-  handler          = "lambda_function.lambda_handler"
-  source_code_hash = filebase64sha256("lambda_deployment_package.zip")
+  handler          = "power_manager.lambda_handler"
+  source_code_hash = filebase64sha256("power_manager_package.zip")
   runtime          = "python3.12"
 
   environment {
@@ -62,6 +62,7 @@ resource "aws_lambda_function" "scheduler_lambda" {
       SCHEDULES       = jsonencode(var.schedules)
       PERIODS         = jsonencode(var.periods)
       TARGET_ACCOUNTS = jsonencode(var.target_accounts)
+      AWS_REGIONS     = jsonencode(var.regions)
     }
   }
 
@@ -70,6 +71,7 @@ resource "aws_lambda_function" "scheduler_lambda" {
 
   depends_on = [aws_cloudwatch_log_group.lambda_log_group]
 }
+
 
 # CloudWatch Event Rule for Start (Configurable Start Time)
 resource "aws_cloudwatch_event_rule" "scheduler_start_rule" {

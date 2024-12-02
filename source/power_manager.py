@@ -10,23 +10,14 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # Load environment variables
+MINUTES_IN_HOUR = 60
 SCHEDULES = json.loads(os.getenv("SCHEDULES", "{}"))
-if not SCHEDULES:
-    logger.warning("SCHEDULES environment variable is empty or not provided.")
 PERIODS = json.loads(os.getenv("PERIODS", "{}"))
-if not PERIODS:
-    logger.warning("PERIODS environment variable is empty or not provided.")
 TARGET_ACCOUNTS = json.loads(os.getenv("TARGET_ACCOUNTS", "{}"))
-if not TARGET_ACCOUNTS:
-    logger.warning("TARGET_ACCOUNTS environment variable is empty or not provided.")
-AWS_REGION = os.getenv("AWS_REGION")
-if not AWS_REGION:
-    logger.warning("AWS_REGION environment variable is not provided.")
-ROLE_NAME = os.getenv("ROLE_NAME", "TargetInstanceSchedulerRole")
-if not ROLE_NAME:
-    logger.warning(
-        "ROLE_NAME environment variable is not provided; using default: TargetInstanceSchedulerRole."
-    )
+AWS_REGIONS = json.loads(os.getenv("AWS_REGIONS", "[]"))
+
+if not AWS_REGIONS:
+    logger.warning("AWS_REGIONS environment variable is empty or not provided.")
 
 
 def lambda_handler(event, context):
@@ -36,14 +27,21 @@ def lambda_handler(event, context):
     logger.info(f"Current UTC time: {current_time}")
 
     for account_name, account_id in TARGET_ACCOUNTS.items():
-        logger.info(f"Processing account: {account_name} ({account_id})")
-        try:
-            sts_credentials = assume_role(account_id)
-            ec2 = get_ec2_client(sts_credentials)
-            process_instances(ec2, account_id, action, current_time)
-        except Exception as e:
-            logger.error(f"Error processing account {account_name}: {str(e)}")
-        logger.info(f"Finished processing account: {account_name} ({account_id})")
+        for region in AWS_REGIONS:
+            logger.info(
+                f"Processing account: {account_name} ({account_id}) in region: {region}"
+            )
+            try:
+                sts_credentials = assume_role(account_id)
+                ec2 = get_ec2_client(sts_credentials, region)
+                process_instances(ec2, account_id, action, current_time)
+            except Exception as e:
+                logger.error(
+                    f"Error processing account {account_name} in region {region}: {str(e)}"
+                )
+            logger.info(
+                f"Finished processing account: {account_name} ({account_id}) in region: {region}"
+            )
 
 
 def process_instances(ec2, account_id, action, current_time):
@@ -92,9 +90,9 @@ def should_execute_schedule(schedule, current_time, action):
                 f"Period {period_name}: start {start_hour}:{start_minute}, end {end_hour}:{end_minute}"
             )
 
-            current_minutes = current_hour * 60 + current_minute
-            start_minutes = start_hour * 60 + start_minute
-            end_minutes = end_hour * 60 + end_minute
+            current_minutes = current_hour * MINUTES_IN_HOUR + current_minute
+            start_minutes = start_hour * MINUTES_IN_HOUR + start_minute
+            end_minutes = end_hour * MINUTES_IN_HOUR + end_minute
 
             if end_minutes < start_minutes:
                 if current_minutes >= start_minutes or current_minutes < end_minutes:
@@ -123,7 +121,7 @@ def execute_schedule(ec2, schedule_name, action):
 def assume_role(account_id):
     logger.info(f"Assuming role for account: {account_id}")
     sts_client = boto3.client("sts")
-    role_arn = f"arn:aws:iam::{account_id}:role/{ROLE_NAME}"
+    role_arn = f"arn:aws:iam::{account_id}:role/TargetInstanceSchedulerRole"
     try:
         response = sts_client.assume_role(
             RoleArn=role_arn, RoleSessionName="LambdaCrossAccountSession"
@@ -135,7 +133,7 @@ def assume_role(account_id):
         raise
 
 
-def get_ec2_client(credentials, region=AWS_REGION):
+def get_ec2_client(credentials, region):
     return boto3.client(
         "ec2",
         region_name=region,

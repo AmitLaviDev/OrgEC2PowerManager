@@ -1,6 +1,8 @@
 # Account specific variables
 account = "730335184263"
-region  = "il-central-1"
+regions  = [
+  "il-central-1"
+]
 
 accounts_arns = [
   "arn:aws:iam::381492020195:role/TargetInstanceSchedulerRole",
@@ -53,5 +55,5 @@ periods = {
   }
 }
 
-lambda_package_path = "lambda_deployment_package.zip"
+lambda_package_path = "power_manager_package.zip"
 
