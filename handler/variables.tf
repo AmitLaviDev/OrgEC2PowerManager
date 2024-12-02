@@ -9,16 +9,6 @@ variable "regions" {
   description = "List of AWS regions where resources should be deployed."
 }
 
-variable "accounts_arns" {
-  type        = list(string)
-  description = "List of target ARNs of cross-account roles for instance scheduling"
-}
-
-variable "accounts_nums" {
-  type        = list(string)
-  description = "List of target AWS account numbers for cross-account operations"
-}
-
 # Define the variables to allow customization
 variable "instance_schedule_tags" {
   type        = map(string)
@@ -84,18 +74,19 @@ variable "periods" {
 
 variable "utc_time_diff" {
   type        = number
-  description = "Time difference between UTC and Israel time."
+  description = "Time difference between UTC and local time."
+  default = 0 # UTC time
 }
 
 variable "start_time_local" {
   type        = number
-  description = "Start time in Israel local time (24-hour format)."
+  description = "Schedule start time in local time (24-hour format)."
   default = 6
 }
 
 variable "stop_time_local" {
   type        = number
-  description = "Stop time in Israel local time (24-hour format)."
+  description = "Schedule stop time in local time (24-hour format)."
   default = 18
 
 }
