@@ -55,5 +55,5 @@ periods = {
   }
 }
 
-lambda_package_path = "power_manager_package.zip"
+lambda_package_path = "../res/power_manager_package.zip"
 
