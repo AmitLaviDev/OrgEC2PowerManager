@@ -90,11 +90,14 @@ variable "utc_time_diff" {
 variable "start_time_local" {
   type        = number
   description = "Start time in Israel local time (24-hour format)."
+  default = 6
 }
 
 variable "stop_time_local" {
   type        = number
   description = "Stop time in Israel local time (24-hour format)."
+  default = 18
+
 }
 
 variable "lambda_package_path" {
