@@ -1,15 +1,10 @@
 # Account specific variables
-account = "730335184263"
-regions  = [
-  "il-central-1"
-]
+account = "" # Source account ID
+regions  = [] # List of regions to be managed
 
 target_accounts = {
-  "M-Bechirot-Main-Prod"      = "381492020195"
-  "M-Bechirot-Shared-Network" = "058264438857"
-  "M-Bechirot-Main-Test"      = "637423312969"
-  "M-Bechirot-Security-Prod"  = "008971673223"
+  TARGET_NAME      = "Number" # Target accounts Names and Numbers
 }
 
-lambda_package_path = "../lambda_package/power_manager_package.zip"
+lambda_package_path = "" # Path to the lambda deployment package to be uploaded
 
