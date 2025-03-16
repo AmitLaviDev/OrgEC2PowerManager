@@ -33,7 +33,7 @@ Before using this module, ensure you have:
 
 ```terraform
 module "ec2_power_manager" {
-  source = "github.com/your-org/OrgEC2PowerManager"
+  source = "github.com/amitlavidev/OrgEC2PowerManager"
   
   aws_region  = "us-east-1"
   name_prefix = "nonprod-power-mgr"
